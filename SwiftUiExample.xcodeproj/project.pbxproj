@@ -14,6 +14,8 @@
 		4E272BA928E702E300628B9B /* SwiftUiExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E272BA828E702E300628B9B /* SwiftUiExampleTests.swift */; };
 		4E272BB328E702E300628B9B /* SwiftUiExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E272BB228E702E300628B9B /* SwiftUiExampleUITests.swift */; };
 		4E272BB528E702E300628B9B /* SwiftUiExampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E272BB428E702E300628B9B /* SwiftUiExampleUITestsLaunchTests.swift */; };
+		4E272BC328E702FE00628B9B /* Bugsnag in Frameworks */ = {isa = PBXBuildFile; productRef = 4E272BC228E702FE00628B9B /* Bugsnag */; };
+		4E272BC528E702FE00628B9B /* BugsnagNetworkRequestPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 4E272BC428E702FE00628B9B /* BugsnagNetworkRequestPlugin */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,7 @@
 		4E272BAE28E702E300628B9B /* SwiftUiExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftUiExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E272BB228E702E300628B9B /* SwiftUiExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUiExampleUITests.swift; sourceTree = "<group>"; };
 		4E272BB428E702E300628B9B /* SwiftUiExampleUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUiExampleUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		4E272BC628E7032800628B9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +54,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E272BC528E702FE00628B9B /* BugsnagNetworkRequestPlugin in Frameworks */,
+				4E272BC328E702FE00628B9B /* Bugsnag in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +99,7 @@
 		4E272B9628E702E100628B9B /* SwiftUiExample */ = {
 			isa = PBXGroup;
 			children = (
+				4E272BC628E7032800628B9B /* Info.plist */,
 				4E272B9728E702E100628B9B /* SwiftUiExampleApp.swift */,
 				4E272B9928E702E100628B9B /* ContentView.swift */,
 				4E272B9B28E702E300628B9B /* Assets.xcassets */,
@@ -137,12 +143,17 @@
 				4E272B9028E702E100628B9B /* Sources */,
 				4E272B9128E702E100628B9B /* Frameworks */,
 				4E272B9228E702E100628B9B /* Resources */,
+				4E272BC728E7060A00628B9B /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = SwiftUiExample;
+			packageProductDependencies = (
+				4E272BC228E702FE00628B9B /* Bugsnag */,
+				4E272BC428E702FE00628B9B /* BugsnagNetworkRequestPlugin */,
+			);
 			productName = SwiftUiExample;
 			productReference = 4E272B9428E702E100628B9B /* SwiftUiExample.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +226,9 @@
 				Base,
 			);
 			mainGroup = 4E272B8B28E702E100628B9B;
+			packageReferences = (
+				4E272BC128E702FE00628B9B /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */,
+			);
 			productRefGroup = 4E272B9528E702E100628B9B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -251,6 +265,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4E272BC728E7060A00628B9B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(DWARF_DSYM_FOLDER_PATH)/$(DWARF_DSYM_FILE_NAME)/Contents/Resources/DWARF/$(TARGET_NAME)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /usr/bin/ruby;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\napi_key = 'b99fc5d430ef12606c14afd426ea1437'\n\nif ENV['ENABLE_USER_SCRIPT_SANDBOXING'] == 'YES'\n  count = ENV['SCRIPT_INPUT_FILE_COUNT'].to_i\n  abort 'error: dSYMs must be specified as build phase \"Input Files\" because ENABLE_USER_SCRIPT_SANDBOXING is enabled' unless count > 0\n  dsyms = []\n  for i in 0 .. count - 1\n    dsym = ENV[\"SCRIPT_INPUT_FILE_#{i}\"]\n    if File.exist? dsym\n      dsyms.append dsym\n    else\n      abort \"error: cannot read #{dsym}\" unless ENV['DEBUG_INFORMATION_FORMAT'] != 'dwarf-with-dsym'\n    end\n  end\nelse\n  dsyms = Dir[\"#{ENV['DWARF_DSYM_FOLDER_PATH']}/*/Contents/Resources/DWARF/*\"]\nend\n\ndsyms.each do |dsym|\n  Process.detach Process.spawn('/usr/bin/curl', '--http1.1',\n    '-F', \"apiKey=#{api_key}\",\n    '-F', \"dsym=@#{dsym}\",\n    '-F', \"projectRoot=#{ENV['PROJECT_DIR']}\",\n    'https://upload.bugsnag.com/',\n    %i[err out] => :close\n  )\nend\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4E272B9028E702E100628B9B /* Sources */ = {
@@ -420,6 +456,7 @@
 				DEVELOPMENT_TEAM = M482NLUG3A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SwiftUiExample/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -449,6 +486,7 @@
 				DEVELOPMENT_TEAM = M482NLUG3A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SwiftUiExample/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -583,6 +621,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4E272BC128E702FE00628B9B /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bugsnag/bugsnag-cocoa";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4E272BC228E702FE00628B9B /* Bugsnag */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E272BC128E702FE00628B9B /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
+			productName = Bugsnag;
+		};
+		4E272BC428E702FE00628B9B /* BugsnagNetworkRequestPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E272BC128E702FE00628B9B /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
+			productName = BugsnagNetworkRequestPlugin;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4E272B8C28E702E100628B9B /* Project object */;
 }
